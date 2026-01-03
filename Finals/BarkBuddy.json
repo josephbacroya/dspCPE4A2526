@@ -1,0 +1,331 @@
+{
+  "name": "BarkBuddy",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bark-buddy",
+        "responseMode": "streaming",
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        368,
+        -432
+      ],
+      "id": "f8886305-cf13-4d90-98dc-b207f885310c",
+      "name": "Webhook",
+      "webhookId": "fffb6025-f0b4-4051-aa88-620967278c00"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "\"Analyze the audio. Is there dog barking or growling? Reply ONLY with JSON: {\\\"barking\\\": true} or {\\\"barking\\\": false}. Also check the query parameter 'temp'. If it is above 24 or below 18, set {\\\"env_alert\\\": true}.\"",
+        "audioUrls": "=",
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        576,
+        -432
+      ],
+      "id": "d7885e63-5263-4db1-ae83-62a85224d6f6",
+      "name": "Dog Sound / Harsh Environment Detection",
+      "retryOnFail": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "DmAHlGmne4YtfACR",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "690e7036-b496-4cfd-a7ab-d85ed21a6241",
+              "leftValue": "={{ $json.decision }}",
+              "rightValue": "YES",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        -528
+      ],
+      "id": "cd482588-378d-45f7-a5b4-6dde60a03583",
+      "name": "If 7 out of 10 are YES"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n  <title>Bark Buddy Security Alert</title>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f2f4f6; font-family: 'Segoe UI', Helvetica, Arial, sans-serif;\">\n\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f2f4f6;\">\n    <tr>\n      <td align=\"center\" style=\"padding: 20px 0;\">\n        \n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" style=\"background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 90%;\">\n          \n          <tr>\n            <td bgcolor=\"#D32F2F\" style=\"padding: 25px; text-align: center;\">\n              <div style=\"font-size: 40px; margin-bottom: 10px;\">🚨</div>\n              <h1 style=\"color: #ffffff; margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;\">Barking Detected</h1>\n              <p style=\"color: #ffcdd2; margin: 5px 0 0; font-size: 14px;\">Action Required: Check on your pet</p>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 30px;\">\n              \n              <p style=\"color: #555555; font-size: 16px; line-height: 1.5; margin-bottom: 25px; text-align: center;\">\n                Your <strong>Bark Buddy</strong> system has detected sustained noise levels consistent with barking or growling.\n              </p>\n\n              <div style=\"background-color: #FFF3E0; border: 1px solid #FFCC80; border-radius: 8px; padding: 15px; margin-bottom: 30px; text-align: center;\">\n                <span style=\"display: block; font-size: 12px; color: #E65100; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;\">AI Confidence Score</span>\n                <span style=\"display: block; font-size: 28px; font-weight: 800; color: #D84315; margin-top: 5px;\">{{ $json.score }}</span>\n                <span style=\"font-size: 13px; color: #E65100;\">Positive Detections</span>\n              </div>\n\n              <hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 25px 0;\">\n\n              <p style=\"color: #999999; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; text-align: center;\">Home Environment Status</p>\n\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td width=\"50%\" style=\"padding-right: 8px;\">\n                    <div style=\"background-color: #F8F9FA; border-radius: 8px; padding: 20px; text-align: center;\">\n                      <div style=\"font-size: 24px; margin-bottom: 5px;\">🌡️</div>\n                      <div style=\"color: #333333; font-size: 22px; font-weight: bold;\">\n                        {{ $('Webhook').item.json.query.temp }}°C\n                      </div>\n                      <div style=\"color: #888888; font-size: 12px;\">Temperature</div>\n                    </div>\n                  </td>\n                  \n                  <td width=\"50%\" style=\"padding-left: 8px;\">\n                    <div style=\"background-color: #F8F9FA; border-radius: 8px; padding: 20px; text-align: center;\">\n                      <div style=\"font-size: 24px; margin-bottom: 5px;\">💧</div>\n                      <div style=\"color: #333333; font-size: 22px; font-weight: bold;\">\n                         {{ $('Webhook').item.json.query.hum }}%\n                      </div>\n                      <div style=\"color: #888888; font-size: 12px;\">Humidity</div>\n                    </div>\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <tr>\n            <td bgcolor=\"#37474F\" style=\"padding: 20px; text-align: center;\">\n              <p style=\"color: #CFD8DC; font-size: 12px; margin: 0;\">\n                Event Recorded: <strong>{{ new Date().toLocaleString() }}</strong>\n              </p>\n              <p style=\"color: #90A4AE; font-size: 11px; margin: 10px 0 0;\">\n                Bark Buddy Automated System\n              </p>\n            </td>\n          </tr>\n\n        </table>\n\n        <div style=\"height: 40px; font-size: 1px; line-height: 1px;\">&nbsp;</div>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1280,
+        -544
+      ],
+      "id": "f8b7278e-594a-4dae-b127-89c6d29adc14",
+      "name": "HTML1"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n  <title>Bark Buddy Environment Alert</title>\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f2f4f6; font-family: 'Segoe UI', Helvetica, Arial, sans-serif;\">\n\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f2f4f6;\">\n    <tr>\n      <td align=\"center\" style=\"padding: 20px 0;\">\n        \n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" style=\"background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 90%;\">\n          \n          <tr>\n            <td bgcolor=\"#EF6C00\" style=\"padding: 25px; text-align: center;\">\n              <div style=\"font-size: 40px; margin-bottom: 10px;\">🌡️</div>\n              <h1 style=\"color: #ffffff; margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;\">Temperature Warning</h1>\n              <p style=\"color: #FFE0B2; margin: 5px 0 0; font-size: 14px;\">Action Required: Environment Unsafe</p>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 30px;\">\n              \n              <p style=\"color: #555555; font-size: 16px; line-height: 1.5; margin-bottom: 25px; text-align: center;\">\n                <strong>Warning:</strong> The temperature in your home has moved outside the safe range (Below 18°C or Above 30°C).\n              </p>\n\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin-bottom: 30px;\">\n                <tr>\n                  <td align=\"center\">\n                    <div style=\"background-color: #FFF3E0; border: 2px solid #FFB74D; border-radius: 50%; width: 120px; height: 120px; display: table-cell; vertical-align: middle; text-align: center;\">\n                      <span style=\"display: block; font-size: 12px; color: #E65100; font-weight: bold;\">CURRENT</span>\n                      <span style=\"display: block; font-size: 32px; font-weight: 800; color: #D84315;\">\n                        {{ $('Webhook').item.json.query.temp }}°C\n                      </span>\n                    </div>\n                  </td>\n                </tr>\n              </table>\n\n              <div style=\"background-color: #FAFAFA; border: 1px solid #EEEEEE; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center;\">\n                <span style=\"display: block; font-size: 12px; color: #999999; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;\">AI Verification Score</span>\n                <span style=\"display: block; font-size: 18px; font-weight: bold; color: #555555; margin-top: 5px;\">{{ $json.score }}</span>\n                <span style=\"font-size: 12px; color: #999999;\">Consistent Readings</span>\n              </div>\n\n              <hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 25px 0;\">\n\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td width=\"100%\" align=\"center\">\n                    <div style=\"background-color: #F8F9FA; border-radius: 8px; padding: 15px; display: inline-block; min-width: 150px;\">\n                      <span style=\"font-size: 20px;\">💧</span>\n                      <span style=\"color: #333333; font-size: 18px; font-weight: bold; margin-left: 10px;\">\n                         {{ $('Webhook').item.json.query.hum }}% Humidity\n                      </span>\n                    </div>\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <tr>\n            <td bgcolor=\"#37474F\" style=\"padding: 20px; text-align: center;\">\n              <p style=\"color: #CFD8DC; font-size: 12px; margin: 0;\">\n                Event Recorded: <strong>{{ new Date().toLocaleString() }}</strong>\n              </p>\n              <p style=\"color: #90A4AE; font-size: 11px; margin: 10px 0 0;\">\n                Bark Buddy Automated System\n              </p>\n            </td>\n          </tr>\n\n        </table>\n\n        <div style=\"height: 40px; font-size: 1px; line-height: 1px;\">&nbsp;</div>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1280,
+        -368
+      ],
+      "id": "57b862c9-00c5-4f82-88d1-7c54a53b990a",
+      "name": "HTML2"
+    },
+    {
+      "parameters": {
+        "sendTo": "1620052@ub.edu.ph",
+        "subject": "BarkBuddy - Barking Alert",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1488,
+        -544
+      ],
+      "id": "029d1254-934c-4465-9a5c-8037ec94e48b",
+      "name": "Barking Alert",
+      "webhookId": "bba10fbb-0820-470d-aa66-06281daad834",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VIaqwiPJDWIVk0ED",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "1620052@ub.edu.ph",
+        "subject": "BarkBuddy - Temperature Alert",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1488,
+        -368
+      ],
+      "id": "2d71413d-c212-43c0-a6d6-7d552f2e3c43",
+      "name": "Temperature Alert",
+      "webhookId": "8412fc6e-13f1-4991-a7c2-9802e4ccee56",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VIaqwiPJDWIVk0ED",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Grab the text output from Gemini\nconst geminiText = $input.first().json.candidates[0].content.parts[0].text;\n\n// 2. Parse the text for env_alert\nlet isTempAlert = false;\ntry {\n  const cleanText = geminiText.replace(/```json|```/g, '').trim();\n  const parsedData = JSON.parse(cleanText);\n  // Default to false if env_alert is missing\n  isTempAlert = parsedData.env_alert === true; \n} catch (e) {\n  isTempAlert = false;\n}\n\n// 3. Access Workflow Memory\nconst staticData = $getWorkflowStaticData('global');\n\n// Use tempHistory (Critical: different variable name than barking)\nif (!staticData.tempHistory) {\n  staticData.tempHistory = [];\n}\n\n// 4. Update History\nstaticData.tempHistory.push(isTempAlert);\n\n// -------------------------------------------------------\n// NEW LOGIC: Batch & Reset\n// -------------------------------------------------------\n\nlet decision = null;\nlet shouldContinue = null;\nlet displayScore = staticData.tempHistory.filter(val => val === true).length + \"/\" + staticData.tempHistory.length;\nlet outputHistory = [...staticData.tempHistory]; // Copy for display\n\n// Only trigger decision if we have collected exactly 10 items\nif (staticData.tempHistory.length >= 10) {\n\n  // A. Calculate Result\n  const yesCount = staticData.tempHistory.filter(val => val === true).length;\n  const thresholdMet = yesCount >= 7;\n\n  // B. Set Output Variables\n  decision = thresholdMet ? \"YES\" : \"NO\";\n  shouldContinue = thresholdMet;\n  displayScore = yesCount + \"/10 (Batch Complete)\";\n\n  // C. RESET STORAGE (Empty the array for the next new batch)\n  staticData.tempHistory = [];\n}\n\n// 5. Return Output\nreturn [\n  {\n    json: {\n      decision: decision,           // Will be null until full\n      shouldContinue: shouldContinue, // Will be null until full\n      alertType: \"Temperature/Humidity\",\n      status: decision ? \"BATCH COMPLETE\" : \"COLLECTING DATA\",\n      score: displayScore,\n      latestReading: isTempAlert,\n      history: outputHistory\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -352
+      ],
+      "id": "341f97a7-93cf-419d-b9ed-1eeaff3f9afe",
+      "name": "10 Temporary DB for Bad Temperature Decision"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Grab the text output\nconst geminiText = $input.first().json.candidates[0].content.parts[0].text;\n\n// 2. Parse the text\nlet isBarking = false;\ntry {\n  const cleanText = geminiText.replace(/```json|```/g, '').trim();\n  const parsedData = JSON.parse(cleanText);\n  isBarking = parsedData.barking;\n} catch (e) {\n  isBarking = false;\n}\n\n// 3. Access Workflow Memory\nconst staticData = $getWorkflowStaticData('global');\n\nif (!staticData.barkHistory) {\n  staticData.barkHistory = [];\n}\n\n// 4. Update History\nstaticData.barkHistory.push(isBarking);\n\n// -------------------------------------------------------\n// NEW LOGIC: Batch & Reset\n// -------------------------------------------------------\n\nlet decision = null;\nlet shouldContinue = null;\nlet displayScore = staticData.barkHistory.filter(val => val === true).length + \"/\" + staticData.barkHistory.length;\nlet outputHistory = [...staticData.barkHistory]; // Copy current history to show in output\n\n// Only trigger decision if we have collected exactly 10 items\nif (staticData.barkHistory.length >= 10) {\n  \n  // A. Calculate Result\n  const yesCount = staticData.barkHistory.filter(val => val === true).length;\n  const thresholdMet = yesCount >= 7;\n  \n  // B. Set Output Variables\n  decision = thresholdMet ? \"YES\" : \"NO\";\n  shouldContinue = thresholdMet;\n  displayScore = yesCount + \"/10 (Batch Complete)\";\n  \n  // C. RESET STORAGE (Empty the array for the next new batch)\n  staticData.barkHistory = []; \n}\n\n// 5. Return Output\nreturn [\n  {\n    json: {\n      decision: decision,           // Will be null until full\n      shouldContinue: shouldContinue, // Will be null until full\n      status: decision ? \"BATCH COMPLETE\" : \"COLLECTING DATA\",\n      score: displayScore,\n      latestReading: isBarking,\n      history: outputHistory        // Shows the list (e.g., 10 items when full)\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -528
+      ],
+      "id": "12425bae-88d4-474e-be16-86642e101523",
+      "name": "10 Temporary DB for Bark Sound Decision",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "470b70b6-927f-49e2-9485-c1ec6ee19863",
+              "leftValue": "={{ $json.decision }}",
+              "rightValue": "YES",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        -352
+      ],
+      "id": "e9e34946-6ba4-4f85-8a3a-d2aad278de05",
+      "name": "If 7 Out of 10 are YES"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Dog Sound / Harsh Environment Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dog Sound / Harsh Environment Detection": {
+      "main": [
+        [
+          {
+            "node": "10 Temporary DB for Bark Sound Decision",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "10 Temporary DB for Bad Temperature Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If 7 out of 10 are YES": {
+      "main": [
+        [
+          {
+            "node": "HTML1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML1": {
+      "main": [
+        [
+          {
+            "node": "Barking Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML2": {
+      "main": [
+        [
+          {
+            "node": "Temperature Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10 Temporary DB for Bad Temperature Decision": {
+      "main": [
+        [
+          {
+            "node": "If 7 Out of 10 are YES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10 Temporary DB for Bark Sound Decision": {
+      "main": [
+        [
+          {
+            "node": "If 7 out of 10 are YES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If 7 Out of 10 are YES": {
+      "main": [
+        [
+          {
+            "node": "HTML2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7c0ed8e8-725d-4076-8f6b-dc1c2db66728",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ddc12889e55502ec8a29413cfb4a07519341ca99dffbeeac9c7186bd55c5cd0a"
+  },
+  "id": "CwMo3UlLc5B59HBF",
+  "tags": []
+}
